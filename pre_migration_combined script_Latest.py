@@ -1,15 +1,17 @@
 from netmiko import ConnectHandler
-import time
 import os
-# Define your network devices
 
+# Define your network devices IP address in "sdwan_router_ips" text file
 
-sdwan_router_ips= open(r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\routers_ip_csh.txt", "r")
+sdwan_router_ips= open(r"DEFINE FILE PATH WHERE DEVICE IP ADDRESSES ARE STORED\routers_ip_csh.txt", "r")
 
-os.mkdir(r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\Temp files")
+os.mkdir(r"DEFINE PATH WHERE YOU WANT TO CREATE TEMPORARY FOLDER")
 
+#Pre-defined CLIs to fetch desired output
 commands=['show running-config', 'show ip route', 'show ip interface brief']
 k=1
+
+# To connect and fetch desired CLI output from each device
 for router_ips in sdwan_router_ips:
     router_ips= router_ips.strip()
     device_details= {
@@ -25,20 +27,22 @@ for router_ips in sdwan_router_ips:
     
     ssh.enable()
     #####################################
-
+#Capture output of each command via loop
     for x in commands:
           
         if x=='show ip route vrf 10' or x=='show ip route':
             
             ssh.enable()
-            base_path= open(r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\Temp files\{}{}_pre0.txt".format(router_ips,x), "w")
+            base_path= open(r"DEFINE FILE PATH WHERE TEMPORARY OUTPUT OF "SHOW IP ROUTE" CLI WILL BE CAPTURED\{}{}_pre0.txt".format(router_ips,x), "w")
             details=ssh.send_command(x, read_timeout=20)
             base_path.write(x+ "\n" + details+ "\n")
             
             base_path.close()
     
-            open_path= open(r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\Temp files\{}{}_pre0.txt".format(router_ips,x), "r")
-            write_path= open(r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\Temp files\{}{}_pre.txt".format(router_ips,x), "w")
+            open_path= open(r"DEFINE FILE PATH OF "BASE PATH" FILE TO READ ITS CONTENT\{}{}_pre0.txt".format(router_ips,x), "r")
+            write_path= open(r"DEFINE FILE PATH TO CAPTURE PARSED OUTPUT OF ANY VARIENT OF 'SHOW IP ROUTE' CLI\{}{}_pre.txt".format(router_ips,x), "w")
+
+            #Define variables to capture parsed output
             
             new_string=""
             new_list=[]
@@ -85,19 +89,14 @@ for router_ips in sdwan_router_ips:
 
             write_path.close()
             open_path.close()
-            #time.sleep(10)
-        
+            
         else:
         
             print(x+"\n")
-            write_path= open(r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\Temp files\{}{}_pre.txt".format(router_ips,x), "w")    
+            write_path= open(r"DEFINE FILE PATH TO CAPTURE PARSED OUTPUT OF ANY VARIENT 'SHOW IP ROUTE' CLI\{}{}_pre.txt".format(router_ips,x), "w")    
             ssh.enable()
             rest_commands=ssh.send_command(x,read_timeout=20)
             write_path.write("\n"+x + "\n" + rest_commands+"\n")
-            
-            #time.sleep(10)
-
-
 
         write_path.close()
 
