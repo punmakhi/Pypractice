@@ -5,15 +5,14 @@ import filecmp
 import os
 import shutil
 import re
-# Define your network devices
 
-
+# Define your network device IP address in "sdwan_router_ips" text file.
 sdwan_router_ips= open(r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\routers_ip_csh.txt", "r")
 
+#Pre-defined CLIs to fetch desired output
 commands=['show running-config', 'show ip route', 'show ip interface brief']
 
-temp3 = []
-string1=[]
+# To connect and fetch desired CLI output from each device
 for router_ips in sdwan_router_ips:
     router_ips= router_ips.strip()
     device_details= {
@@ -27,26 +26,29 @@ for router_ips in sdwan_router_ips:
     router_ips=str(router_ips)
     ssh= ConnectHandler(**device_details)
 
-    diff_migration_1=open(r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\{}_diff.txt".format(router_ips), "w")
-    post_output= open(r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\{}_post_output.txt".format(router_ips), "w")
+    #Define variable for the files
+    diff_migration_1=open(r"DEFINE FILE PATH WHERE THE DIFFERENCE OUTPUT WILL BE CAPTURED\{}_diff.txt".format(router_ips), "w")
+    post_output= open(r"DEFINE FILE PATH WHERE OUTPUT OF ALL CLIs WILL BE CAPTURED\{}_post_output.txt".format(router_ips), "w")
     #####################################
 
+    #To capture output of each command via loop
     for k in commands:
           
         if k=='show ip route vrf 10' or k=='show ip route':
             
             ssh.enable()
-            base_path= open(r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\Temp files\{}{}_post0.txt".format(router_ips,k), "w")
-            post_output= open(r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\{}_post_output.txt".format(router_ips), "a")
+            base_path= open(r"DEFINE FILE PATH WHERE TEMPORARY OUTPUT OF "SHOW IP ROUTE" CLI WILL BE CAPTURED\{}{}_post0.txt".format(router_ips,k), "w")
+            post_output= open(r"DEFINE FILE PATH WHERE OUTPUT OF ALL CLIs WILL BE CAPTURED\{}_post_output.txt".format(router_ips), "a")
             details=ssh.send_command(k,read_timeout=20)
             base_path.write(k + "\n" + details + "\n")
             
             post_output.write(k + "\n" + details + "\n")
 
             base_path.close()
-            open_path= open(r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\Temp files\{}{}_post0.txt".format(router_ips,k), "r")
-            write_path= open(r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\Temp files\{}{}_post.txt".format(router_ips,k), "w")
-            
+            open_path= open(r"DEFINE FILE PATH OF THE "BASE PATH" FILE TO READ ITS CONTENT\{}{}_post0.txt".format(router_ips,k), "r")
+            write_path= open(r"DEFINE FILE PATH TO CAPTURE PARSED OUTPUT OF ANY VARIENT 'SHOW IP ROUTE' CLI\{}{}_post.txt".format(router_ips,k), "w")
+
+            #Define variables to capture parsed output
             new_string=""
             new_list=[]
             
@@ -87,24 +89,23 @@ for router_ips in sdwan_router_ips:
                 new_string=""
             write_path.close()
             open_path.close()
-            #time.sleep(10)
+            
         else:
             
             ssh.enable()
-            post_output= open(r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\{}_post_output.txt".format(router_ips), "a")
-            write_path= open(r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\Temp files\{}{}_post.txt".format(router_ips,k), "w")    
+            post_output= open(r"DEFINE FILE PATH WHERE OUTPUT OF ALL CLIs WILL BE CAPTURED\{}_post_output.txt".format(router_ips), "a")
+            write_path= open(r"DEFINE FILE PATH TO CAPTURE PARSED OUTPUT OF ANY VARIENT 'SHOW IP ROUTE' CLI\{}{}_post.txt".format(router_ips,k), "w")    
             rest_commands=ssh.send_command(k,read_timeout=20)
             write_path.write("\n"+ k + "\n" + rest_commands + "\n")
             post_output.write("\n"+ k + "\n" + rest_commands + "\n")
-            #time.sleep(10)
-
+        
 
         write_path.close()
 
 
 
-        pre_migration_1= open(r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\Temp files\{}{}_pre.txt".format(router_ips,k), "r")
-        post_migration_1=open(r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\Temp files\{}{}_post.txt".format(router_ips,k), "r")
+        pre_migration_1= open(r"DEFINE FILE PATH TO TEMPORARY CAPTURE OUTPUT SHOW CLIs BEFORE THE CHANGE\{}{}_pre.txt".format(router_ips,k), "r")
+        post_migration_1=open(r"DEFINE FILE PATH TO TEMPORARY CAPTURE OUTPUT SHOW CLIs AFTER THE CHANGE\{}{}_post.txt".format(router_ips,k), "r")
         
         
         pre_migration= pre_migration_1.readlines()
@@ -124,52 +125,26 @@ for router_ips in sdwan_router_ips:
         for element in post_migration:
 
                 if element not in pre_migration:
-
-                        
+                    
                         diff_migration_1.write("\n"+element+ "\n")
-                        
-                        #time_values= time_pattern.search(element)
-                        #print(time_values)
                         print(element)
                         print("\n")
         
-
-
         diff_migration_1.write("\n"+"<-------Deleted Config------->\n")
 
         for element in pre_migration:
 
                 if element not in post_migration:
 
-                        
                         diff_migration_1.write("\n"+element+ "\n")
-                        
                         print(element)
                         print("\n")
         diff_migration_1.write("\n---------------------------End of Command output-------------------------------------\n")
-
-   # pre_migration_1.close()
-   # post_migration_1.close()
-
-   # diff_migration_1.close()
-
-#time.sleep(35)
 
 sdwan_router_ips.close()
 pre_migration_1.close()
 post_migration_1.close()
 diff_migration_1.close()
 
-
-#os.chmod(r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\Temp files", 0o777)
-
-#for router_ipss in sdwan_router_ips:
- #   for y in commands:
-  #      location= r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\Temp files"
-   #    path= os.path.join(location,"{}{}_post.txt".format(router_ipss,y))
-    #    os.remove(path)
-        #os.remove(r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\Temp files\{}{}_post.txt".format(router_ipss,y))
-        #os.remove(r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\Temp files\{}{}_pre.txt".format(router_ipss,y))
-
-#shutil.rmtree(r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\Temp files")
+shutil.rmtree(r"DEFINE THE PATH OF TEMPORARY FOLDER WHICH WILL HOLD PRE AND POST MIGRATION OUTPUTs")
 
