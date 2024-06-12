@@ -1,13 +1,8 @@
 from netmiko import ConnectHandler
-import time
-from difflib import Differ 
-import filecmp
-import os
 import shutil
-import re
 
 # Define your network device IP address in "sdwan_router_ips" text file.
-sdwan_router_ips= open(r"C:\Users\punmakhi\OneDrive - Cisco\Desktop\Scripts\Scripts\multifile\routers_ip_csh.txt", "r")
+sdwan_router_ips= open(r"DEFINE FILE PATH WHERE DEVICE IP ADDRESSES ARE STORED/routers_ip_csh.txt", "r")
 
 #Pre-defined CLIs to fetch desired output
 commands=['show running-config', 'show ip route', 'show ip interface brief']
@@ -116,7 +111,6 @@ for router_ips in sdwan_router_ips:
         post_migration = [x.strip() for x in post_migration]
         post_migration=list(post_migration)
         
-        #time_pattern = re.compile(r'\d{1,2}:\d{2}:\d{2}|\d+[wdhms]')
              
         print("\n\n"+k)
 
