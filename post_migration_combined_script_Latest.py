@@ -1,6 +1,6 @@
 from netmiko import ConnectHandler
 import shutil
-
+#
 # Define your network device IP address in "sdwan_router_ips" text file.
 sdwan_router_ips= open(r"DEFINE FILE PATH WHERE DEVICE IP ADDRESSES ARE STORED/routers_ip_csh.txt", "r")
 
